@@ -5,5 +5,5 @@
 - Actualización de usuarios
 - Listado de usuarios
 
-[!NOTE]
+
 **Administrado con SharedPreferences**
