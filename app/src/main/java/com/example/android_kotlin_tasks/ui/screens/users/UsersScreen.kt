@@ -23,11 +23,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.withResumed
 import androidx.navigation.NavController
 import com.example.android_kotlin_tasks.config.route.Routes
 import com.example.android_kotlin_tasks.domain.models.UserModel
@@ -40,17 +43,17 @@ import kotlinx.serialization.json.Json
 fun UsersScreen(navController: NavController) {
     val sharedPreferencesService = SharedPreferencesService(context = LocalContext.current)
     val usersList = remember{ mutableStateOf<List<UserModel>>(emptyList()) }
-    suspend fun getData(){
-        var data = sharedPreferencesService.read("user") ?: null
-        println(data)
-        val users: List<UserModel> = Json.decodeFromString<List<UserModel>>(data ?: "")
-        println(users)
-        usersList.value = users
+    // variable ciclo de vida
+    val lifecycleOwner = LocalLifecycleOwner.current
 
-        println("mi data")
+    suspend fun getData(){
+        val data = sharedPreferencesService.read("users")
+        if(!data.isNullOrEmpty()){
+            usersList.value = Json.decodeFromString<List<UserModel>>(data);
+        }
     }
-    LaunchedEffect(Unit ){
-        println("init data")
+    LaunchedEffect(lifecycleOwner ){
+
         getData()
     }
     MainLayout(onTapFloat = { navController.navigate(Routes.UsersForm.route)

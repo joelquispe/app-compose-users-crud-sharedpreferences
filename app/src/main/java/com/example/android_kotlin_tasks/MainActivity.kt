@@ -16,6 +16,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.android_kotlin_tasks.config.route.Routes
 import com.example.android_kotlin_tasks.ui.screens.login.LoginScreen
+import com.example.android_kotlin_tasks.ui.screens.profile.Profile
 import com.example.android_kotlin_tasks.ui.screens.users.UsersFormScreen
 import com.example.android_kotlin_tasks.ui.screens.users.UsersScreen
 import com.example.android_kotlin_tasks.ui.theme.AndroidkotlintasksTheme
@@ -34,7 +35,9 @@ class MainActivity : ComponentActivity() {
                 ) {
                     val navigationController = rememberNavController()
                     NavHost(navController = navigationController,
-                        startDestination = Routes.Login.route, builder = {
+                        startDestination = Routes.Profile.route, builder = {
+                            composable(Routes.Profile.route) { Profile(navController =
+                            navigationController) }
                             composable(Routes.Users.route) { UsersScreen(navController = navigationController) }
                             composable(Routes.UsersForm.route) { UsersFormScreen(navController =
                             navigationController) }

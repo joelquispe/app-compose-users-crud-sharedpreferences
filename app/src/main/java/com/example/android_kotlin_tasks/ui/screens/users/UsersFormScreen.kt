@@ -20,6 +20,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,18 +42,18 @@ import com.example.android_kotlin_tasks.R
 import com.example.android_kotlin_tasks.config.route.Routes
 import com.example.android_kotlin_tasks.domain.models.UserModel
 import com.example.android_kotlin_tasks.domain.services.SharedPreferencesService
-import com.google.gson.Gson
-import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonEncoder
+
 import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UsersFormScreen(navController: NavController) {
     val sharedPreferencesService = SharedPreferencesService(context = LocalContext.current);
-    var users : MutableList<UserModel> = mutableListOf()
+    val users by remember {
+        mutableStateOf<MutableList<UserModel>>(mutableListOf())
+    }
     var tfName by remember { mutableStateOf("") }
     var tfLastName by remember {
         mutableStateOf("")
@@ -64,7 +65,41 @@ fun UsersFormScreen(navController: NavController) {
     var isErrorTfName by remember{ mutableStateOf(false) }
     var isErrorTfLastName by remember{ mutableStateOf(false) }
     var isErrorTfDni by remember{ mutableStateOf(false) }
-    return Column(modifier = Modifier
+
+     fun getData(){
+        val data = sharedPreferencesService.read("users")
+        if(!data.isNullOrEmpty()){
+            print("mi data users")
+            users.addAll(Json.decodeFromString<List<UserModel>>(data))
+
+            println(users)
+        }
+    }
+    fun create(){
+        if(tfName.isEmpty()){
+            isErrorTfName = true;
+            println("El campo nombre es requerido");
+        }
+        if(tfLastName.isEmpty()){
+            isErrorTfLastName = true;
+            println("El campo apellido es requerido");
+        }
+        if(tfDni.isEmpty()){
+            isErrorTfDni = true
+            println("El campo dni es requerido");
+        }
+        val userData: UserModel = UserModel(idUser = UUID.randomUUID().toString(),
+            name = tfName, lastName = tfLastName, dni = tfDni)
+        users.add(userData)
+        val jsonData = Json.encodeToString(users)
+        sharedPreferencesService.write("users",jsonData)
+        println("Dato guardado")
+    }
+    LaunchedEffect(Unit ){
+        getData()
+    }
+
+    Column(modifier = Modifier
         .fillMaxHeight()
         .fillMaxWidth()) {
         IconButton(onClick = {
@@ -134,26 +169,7 @@ fun UsersFormScreen(navController: NavController) {
                 }
                 Spacer(modifier = Modifier.height(30.dp))
                 Button(onClick = {
-                    if(tfName.isEmpty()){
-                        isErrorTfName = true;
-                        println("El campo nombre es requerido");
-                    }
-                    if(tfLastName.isEmpty()){
-                        isErrorTfLastName = true;
-                        println("El campo apellido es requerido");
-                    }
-                    if(tfDni.isEmpty()){
-                        isErrorTfDni = true
-                        println("El campo dni es requerido");
-                    }
-                    val gson:Gson = Gson();
-                    val userData: UserModel = UserModel(idUser = UUID.randomUUID().toString(),
-                        name = tfName, lastName = tfLastName, dni = tfDni)
-                    users.add(userData)
-
-                    sharedPreferencesService.write(key = "user", value = Json.encodeToString(users))
-                    navController.popBackStack()
-
+                  create()
                 }, colors = ButtonDefaults.buttonColors(containerColor =Color.Black, contentColor =
                 Color.White )) {
                     Text("Guardar")

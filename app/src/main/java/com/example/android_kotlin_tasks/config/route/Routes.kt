@@ -4,4 +4,6 @@ sealed class Routes(var route:String) {
     object  Login:Routes("login")
     object Users: Routes("users")
     object UsersForm : Routes("usersForm")
+
+    object Profile:Routes("profile")
 }
